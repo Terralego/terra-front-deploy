@@ -12,4 +12,5 @@ for i in $USER_DIRS;do
     if [ ! -e "$i" ];then mkdir -p "$i";fi
     chown $APP_USER:$APP_GROUP "$i"
 done
+chown -Rf root:root /etc/sudoers*
 exec gosu $APP_USER:$APP_GROUP bash -c "prod/start.sh $@"
