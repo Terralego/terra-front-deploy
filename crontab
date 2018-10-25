@@ -1,0 +1,1 @@
+# 0 7 * * * node /code/bin/command &> /logs/cron_action_every_day.log

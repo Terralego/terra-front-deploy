@@ -1,0 +1,12 @@
+# Python
+*.pyc
+__pycache__
+
+# IDE settings
+.vscode
+
+
+# corpusops & ansible
+*.retry
+/.ansible/scripts/ansible_deploy_env
+/local/
