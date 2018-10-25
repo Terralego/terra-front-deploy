@@ -1,0 +1,72 @@
+---
+cops_terralego_name: terralegofrontinstance
+cops_terralego_deploy_env: "dev"
+cops_terralego_docker_image_tag: "{{cops_terralego_name}}"
+cops_terralego_default_docker_tag: "latest"
+cops_terralego_docker_tag: "{{cops_terralego_default_docker_tag}}"
+cops_terralego_nginx_docker_tag: "nginx-{{cops_terralego_default_docker_tag}}"
+cops_terralego_mail_domain: "{{ cops_terralego_tld_domain }}"
+cops_terralego_default_gitref: "master"
+cops_terralego_gitref: "{{cops_terralego_default_gitref}}"
+cops_terralego_dir: "/srv/docker/{{cops_terralego_name}}front"
+cops_terralego_gateway: "{{ ansible_default_ipv4.address}}"
+cops_terralego_composename: "{{cops_terralego_name}}front"
+cops_terralego_devmode: False
+cops_terralego_build_args: "--no-cache nginx"
+cops_terralego_tld_domain: foo.net
+cops_terralego_back_url: "https://staging-terralego-{{cops_terralego_name}}.{{cops_terralego_tld_domain}}"
+cops_terralego_vector_tiles_url: "https://a-staging-tiles-{{cops_terralego_name}}.{{cops_terralego_tld_domain:}}/api/layer"
+# backup could be remove in a-while when we have redeployed it everywhere
+cops_terralego_restarted_services: "nginx"
+cops_terralego_purge_volumes: []
+cops_terralego_sshargs: >-
+  {% set k = hostvars[inventory_hostname].get(
+                'ansible_ssh_private_key_file', '') %}
+  {% if k%}-o IdentityFile={{k}} -o IdentitiesOnly=yes{%endif%}
+  {% if (
+      hostvars[inventory_hostname].ansible_connection|default('ssh')
+     ) not in [ 'smart', 'local'] %}
+  {{ hostvars[inventory_hostname].ssh_args | default('') }}
+  {{ hostvars[inventory_hostname].ansible_ssh_args | default('') }}
+  {{ hostvars[inventory_hostname].ansible_ssh_common_args | default('') }}
+  {{ hostvars[inventory_hostname].ansible_ssh_extra_args | default('') }}
+  {% endif %}
+cops_terralego_build: false
+cops_terralego_pull: true
+cops_terralego_registries: []
+#- {registry: registry.foo.net, username: foo, password: bar}
+cops_terralego_compose_files: [docker-compose.yml, docker-compose-prod.yml]
+cops_terralego_dc:
+  docker-compose {% for i in cops_terralego_compose_files %} -f {{i}}{% endfor %}
+  -p "{{cops_terralego_composename}}"
+cops_terralego_nginx_port: 9080
+cops_terralego_nginx_ssl_port: 9443
+# free form for params inside dockerenv
+cops_terralego_dotenv: |-
+  APP_TYPE=node
+  NODE_NAME={{ cops_terralego_name }}
+  COMPOSE_PROJECT_NAME={{cops_terralego_composename}}
+  CI_COMMIT_SHA={{cops_terralego_gitref}}
+  NODE_NGINX_IMAGE={{ cops_terralego_nginx_docker_image }}
+  NODE_IMAGE={{ cops_terralego_docker_image }}
+  NODE_IMAGE_VERSION={{cops_terralego_docker_tag}}
+  NODE_NGINX_IMAGE_VERSION={{cops_terralego_nginx_docker_tag}}
+  NGINX_PORT={{cops_terralego_nginx_port}}
+  NGINX_SSL_PORT={{cops_terralego_nginx_ssl_port}}
+cops_terralego_dotenv_extra: ""
+# free form for params inside dockerenv
+cops_terralego_docker_env_extra: ""
+# free form for params inside local.py
+cops_terralego_localpy_extra: ""
+# Normally playbook is in ./.ansible/playbooks
+cops_terralego_code_dir: "{{playbook_dir}}/../.."
+cops_terralego_code_rsync_opts: [
+    "-azv",
+    # include deploy projects base code
+    "--include", "local/*-deploy",
+    "--exclude", ".ansible",
+    "--exclude", "local/*",
+    "--exclude", ".git",
+    "--exclude", "node_modules",
+    "--exclude", ".env",
+    "--exclude", "docker.env"]

@@ -1,0 +1,12 @@
+---
+# APP
+- hosts: "{{terralegofront_servers|default('all')}}"
+  roles: [corpusops.roles/ansible_plugins]
+  tasks:
+  - when: ["cops_terralegofront_lifecycle_app|default(true)"]
+    tags: ["cops_terralegofront_lifecycle_app"]
+    include_role: {name: terralegofront_vars, allow_duplicates: false}
+  - when: ["cops_terralegofront_lifecycle_app"]
+    tags: ["cops_terralegofront_lifecycle_app"]
+    block:
+    - include_role: {name: terralegofront,    allow_duplicates: false}

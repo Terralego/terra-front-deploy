@@ -1,0 +1,98 @@
+---
+- file:
+    state: directory
+    mode: "2751"
+    path: "{{item}}"
+  with_items:
+  - "{{cops_terralego_dir}}"
+- name: Synchronise files inside the environment (deleguation)
+  delegate_to: "localhost"
+  synchronize:
+    compress: false
+    ssh_args: "{{cops_terralego_sshargs}}"
+    src: "{{cops_terralego_code_dir}}"
+    dest: "{{cops_terralego_dir}}/"
+    rsync_opts: "{{cops_terralego_code_rsync_opts}}"
+    set_remote_user: "no"
+    #update_opts: '--recursive'
+- template:
+    src: "injection.js"
+    dest: "{{cops_terralego_dir}}/injection.js"
+    mode: "0644"
+    trim_blocks: false
+- template:
+    src: "docker.env"
+    dest: "{{cops_terralego_dir}}/docker.env"
+    mode: "0640"
+    trim_blocks: false
+- blockinfile:
+    create: true
+    path: "{{cops_terralego_dir}}/.env"
+    content: |-
+      {{cops_terralego_dotenv}}
+      {{cops_terralego_dotenv_extra}}
+    marker: "# ANSIBLE MANAGED BLOCK :: deploy commit :: {mark}"
+- include_tasks: docker_login.yml
+  with_items: "{{cops_terralego_registries}}"
+- shell: |
+    set -ex
+    cd "{{cops_terralego_dir}}"
+    {{cops_terralego_dc}} build {{cops_terralego_build_args}}
+  when:
+  - "cops_terralego_build|copsf_asbool"
+  - "cops_terralego_build_args|copsf_asbool"
+# ensure all images are (re) pulled
+- shell: |
+    set -ex
+    cd "{{cops_terralego_dir}}"
+    {{cops_terralego_dc}} pull
+  retries: 5
+  delay: 10
+  when:
+  - "cops_terralego_pull|copsf_asbool"
+- include_role: {name: corpusops.roles/docker_compose_service}
+  vars:
+    _docker_compose_service:
+      working_directory: "{{cops_terralego_dir}}"
+      files: "{{cops_terralego_compose_files}}"
+      project: "{{cops_terralego_composename}}"
+      restart: "on-failure"
+  tags: [service]
+# ensure manually handled services are booted
+# to handle sidekar volumes refresh accuratly
+- shell: |
+    set -ex
+    cd "{{cops_terralego_dir}}"
+    {{cops_terralego_dc}} up -d --no-deps --force-recreate {{cops_terralego_restarted_services}}
+    {% for i in cops_terralego_restarted_services.split()|reverse %}
+    {{cops_terralego_dc}} ps --services --filter status=running | egrep -q "^{{i}}$"
+    {% endfor %}
+  retries: 60
+  delay: 1
+  register: purge_volumes
+  until: "purge_volumes.rc == 0"
+## as we use a named volume for nginx sidekar container, also
+## purge the obsolete volumes leftover in-between
+- shell: |
+    set -ex
+    cd "{{cops_terralego_dir}}"
+    if [[ -n "{{cops_terralego_docker_tag}}" ]];then
+    {% for purge_volume in cops_terralego_purge_volumes %}
+    for v in $(docker volume ls |awk '{print $2 }'|egrep "^{{cops_terralego_composename}}-{{purge_volume}}-"|grep -v {{cops_terralego_docker_tag}});do
+      if ( docker volume inspect $v >/dev/null 2>&1; );then
+        if ! ( docker volume rm -f $v; );then
+          docker volume inspect $v;exit 1;
+        fi
+        echo "purged volume $v">&2
+      fi
+    done
+    fi
+    {% endfor %}
+  # let time to docker to clean volumes
+  args: {executable: /bin/bash}
+  retries: 60
+  delay: 1
+  register: purge_volumes
+  until: "purge_volumes.rc == 0"
+  when: "cops_terralego_docker_tag|copsf_asbool"
+  changed_when: "'purged volume' in purge_volumes.stderr"
