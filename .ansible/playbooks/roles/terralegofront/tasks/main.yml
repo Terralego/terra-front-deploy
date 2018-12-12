@@ -16,11 +16,6 @@
     set_remote_user: "no"
     #update_opts: '--recursive'
 - template:
-    src: "injection.js"
-    dest: "{{cops_terralego_dir}}/injection.js"
-    mode: "0644"
-    trim_blocks: false
-- template:
     src: "docker.env"
     dest: "{{cops_terralego_dir}}/docker.env"
     mode: "0640"
