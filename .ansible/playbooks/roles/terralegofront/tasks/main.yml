@@ -64,13 +64,16 @@
     set -ex
     cd "{{cops_terralego_dir}}"
     {{cops_terralego_dc}} up -d --no-deps --force-recreate {{cops_terralego_restarted_services}}
+- shell: |
+    set -ex
+    cd "{{cops_terralego_dir}}"
     {% for i in cops_terralego_restarted_services.split()|reverse %}
     {{cops_terralego_dc}} ps --services --filter status=running | egrep -q "^{{i}}$"
     {% endfor %}
   retries: 60
   delay: 1
-  register: purge_volumes
-  until: "purge_volumes.rc == 0"
+  register: restarted_docker_services
+  until: "restarted_docker_services.rc == 0"
 ## as we use a named volume for nginx sidekar container, also
 ## purge the obsolete volumes leftover in-between
 - shell: |
