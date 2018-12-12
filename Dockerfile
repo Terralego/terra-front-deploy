@@ -74,6 +74,7 @@ RUN bash -c 'set -ex \
     "'
 # image will drop privileges itself using gosu
 # Expose ports (for orchestrators and dynamic reverse proxies)
+ENV STATICS_DEST=/code/public
 ADD public /code/public/
 ADD src /code/src/
 EXPOSE 3000

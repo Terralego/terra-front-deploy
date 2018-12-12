@@ -63,4 +63,8 @@ RUN sh -c 'set -ex \
 ARG STATICS_FROM=node_image
 ARG STATICS_DIR=/code/build/
 ARG STATICS_DEST=/usr/share/nginx/html/
+ENV STATICS_DEST=$STATICS_DEST
+ADD local/terra-front-deploy/prod/start.sh \
+    local/terra-front-deploy/prod/init.sh \
+    /code/init/
 COPY --from=statics /code/build/ /usr/share/nginx/html/
