@@ -1,8 +1,8 @@
 # workaround for https://github.com/docker/for-mac/issues/2155#issuecomment-338702401
 # declare from earlier
-ARG STATICS_FROM=node
+ARG STATICS_FROM=corpusops/node
 ARG NGINX_VERSION=alpine-perl
-ARG BASE=nginx:$NGINX_VERSION
+ARG BASE=corpusops/nginx:$NGINX_VERSION
 
 FROM $STATICS_FROM as statics
 RUN sh -c 'gosu node npm run-script build'
