@@ -64,6 +64,7 @@ cops_terralego_code_rsync_opts: [
     "-azv",
     # include deploy projects base code
     "--include", "local/*-deploy",
+    "--exclude", ".~tmp~",
     "--exclude", ".ansible",
     "--exclude", "local/*",
     "--exclude", ".git",
