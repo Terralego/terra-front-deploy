@@ -1,0 +1,13 @@
+[program:plone]
+command = npm start $SUPERVISORD_NPM_ARGS
+autostart = true
+autorestart = true
+startsecs = 5
+directory = /code
+user = node:node
+killasgroup = true
+stopasgroup = true
+stopsignal = KILL
+stopwaitsecs = 3
+stdout_logfile=/dev/stdout
+stderr_logfile=/dev/stderr
