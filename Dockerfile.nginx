@@ -1,10 +1,11 @@
-ARG STATICS_FROM=corpusops/node
-ARG NGINX_VERSION=alpine-perl
-ARG BASE=corpusops/nginx:$NGINX_VERSION
+ARG STATICS_FROM=""
+ARG NODE_BASE_NGINX_VERSION=alpine-perl
+ARG NODE_BASE_NGINX_IMAGE=corpusops/nginx
 
 FROM $STATICS_FROM as statics
-FROM $BASE         as nginx
+FROM $NODE_BASE_NGINX_IMAGE:$NODE_BASE_NGINX_VERSION as nginx
 
+ADD prod/env.dist.json /code/prod/
 ADD local/terra-front-deploy/prod/init.sh /code/init/
 ADD local/terra-front-deploy/prod/etc/    /etc/
 COPY --from=statics /code/public/ /usr/share/nginx/html/

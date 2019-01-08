@@ -4,17 +4,21 @@ if [[ "${NO_START-}" ]];then
     exit 0
 fi
 # AS root
-set -ex
+set -e
+SDEBUG=${SDEBUG-}
+#if [[ -n "${SDEBUG}" ]];then set -x;fi
 SCRIPTSDIR="$(dirname $(readlink -f "$0"))"
 cd "$SCRIPTSDIR/.."
 TOPDIR=$(pwd)
-export APP_TYPE="${APP_TYPE:-docker}"
+export APP_TYPE="${APP_TYPE:-node}"
 export APP_USER="${APP_USER:-$APP_TYPE}"
 export APP_GROUP="$APP_USER"
 export USER_DIRS=". build"
 for i in $USER_DIRS;do
     if [ ! -e "$i" ];then mkdir -p "$i";fi
-    chown $APP_USER:$APP_GROUP "$i"
+    if ( getent passwd $APP_USER >/dev/null 2>&1);then
+        chown $APP_USER:$APP_GROUP "$i"
+    fi
 done
 chown -Rf root:root /etc/sudoers*
 NPM_INSTALL=${NPM_INSTALL-}
@@ -62,9 +66,11 @@ _shell() {
     export TERM="$TERM"; export COLUMNS="$COLUMNS"; export LINES="$LINES"
     exec gosu $user sh $( if [[ -z "$bargs" ]];then echo "-i";fi ) -c "$bargs"
 }
+CONF_PREFIX='FRONT__' ENVSUBST_DEST="/code/public/env.json" \
+    confenvsubst.sh /code/prod/env.dist.json
 if [[ "$MODE" = "nginx" ]];then
     # Run nginx
-    CONF_PREFIX='FRONT_' confenvsubst.sh /etc/nginx/conf.d/default.conf.template
+    CONF_PREFIX='FRONT__' confenvsubst.sh /etc/nginx/conf.d/default.conf.template
     export SUPERVISORD_CONFIGS=${SUPERVISORD_CONFIGS:-/etc/supervisor.d/cron /etc/supervisor.d/nginx}
     exec /bin/supervisor.sh
 else
