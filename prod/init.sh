@@ -121,7 +121,7 @@ for i in $USER_DIRS;do
         chown $APP_USER:$APP_GROUP "$i"
     fi
 done
-chown -Rf root:root /etc/sudoers*
+if (find /etc/sudoers* -type f 2>/dev/null);then chown -Rf root:root /etc/sudoers*;fi
 fixperms
 if [[ -z $NO_SETTINGS ]];then
     touch $ENV_JSON
