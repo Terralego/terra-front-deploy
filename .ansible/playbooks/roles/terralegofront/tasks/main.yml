@@ -84,13 +84,15 @@
         echo "purged volume $v">&2
       fi
     done
-    fi
     {% endfor %}
+    fi
   # let time to docker to clean volumes
   args: {executable: /bin/bash}
   retries: 60
   delay: 1
   register: purge_volumes
   until: "purge_volumes.rc == 0"
-  when: "cops_terralego_docker_tag|copsf_asbool"
+  when:
+  - "cops_terralego_docker_tag|copsf_asbool"
+  - "cops_terralego_purge_volumes|copsf_asbool"
   changed_when: "'purged volume' in purge_volumes.stderr"
