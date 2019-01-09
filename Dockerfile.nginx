@@ -4,10 +4,10 @@ ARG NODE_BASE_NGINX_IMAGE=corpusops/nginx
 
 FROM $STATICS_FROM as statics
 FROM $NODE_BASE_NGINX_IMAGE:$NODE_BASE_NGINX_VERSION as nginx
+ENV IMAGE_MODE=nginx
 
 ADD prod/env.dist.json /code/prod/
 ADD local/terra-front-deploy/prod/init.sh /code/init/
 ADD local/terra-front-deploy/prod/etc/    /etc/
 COPY --from=statics /code/public/ /usr/share/nginx/html/
 ENTRYPOINT ["/code/init/init.sh"]
-CMD ["nginx"]

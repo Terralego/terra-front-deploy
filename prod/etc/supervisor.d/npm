@@ -1,10 +1,9 @@
-[program:plone]
-command = npm start $SUPERVISORD_NPM_ARGS
+[program:node]
+command = gosu node:node sh -c 'exec npm start $SUPERVISORD_NPM_ARGS'
 autostart = true
 autorestart = true
 startsecs = 5
 directory = /code
-user = node:node
 killasgroup = true
 stopasgroup = true
 stopsignal = KILL

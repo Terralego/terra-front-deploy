@@ -14,8 +14,7 @@ cops_terralego_composename: "{{cops_terralego_name}}front"
 cops_terralego_devmode: False
 cops_terralego_build_args: "--no-cache nginx"
 cops_terralego_tld_domain: foo.net
-cops_terralego_back_url: "https://staging-terralego-{{cops_terralego_name}}.{{cops_terralego_tld_domain}}"
-cops_terralego_vector_tiles_url: "https://a-staging-tiles-{{cops_terralego_name}}.{{cops_terralego_tld_domain:}}/api/layer"
+cops_terralego_back_url: "https://staging-terralego-{{cops_terralego_name}}.{{cops_terralego_tld_domain}}/api"
 # backup could be remove in a-while when we have redeployed it everywhere
 cops_terralego_restarted_services: "nginx"
 cops_terralego_purge_volumes: []
@@ -42,22 +41,34 @@ cops_terralego_dc:
 cops_terralego_nginx_port: 9080
 cops_terralego_nginx_ssl_port: 9443
 # free form for params inside dockerenv
+cops_terralego_docker_env_freeform: |-
+  {{ cops_terralego_docker_env_defaults}}
+  {{ cops_terralego_docker_env_extra}}
+cops_terralego_docker_env_defaults: |-
+  FRONT__API_PROVIDER={{cops_terralego_back_url}}
+  FRONT__GATEWAY={{cops_terralego_gateway}}
+cops_terralego_node_base_node_image: corpusops/node
+cops_terralego_node_base_node_version: 10.10
+cops_terralego_node_base_nginx_image: corpusops/nginx
+cops_terralego_node_base_nginx_version: 1.15-alpine
 cops_terralego_dotenv: |-
   APP_TYPE=node
   NODE_NAME={{ cops_terralego_name }}
   COMPOSE_PROJECT_NAME={{cops_terralego_composename}}
   CI_COMMIT_SHA={{cops_terralego_gitref}}
-  NODE_NGINX_IMAGE={{ cops_terralego_nginx_docker_image }}
   NODE_IMAGE={{ cops_terralego_docker_image }}
   NODE_IMAGE_VERSION={{cops_terralego_docker_tag}}
+  NODE_NGINX_IMAGE={{ cops_terralego_nginx_docker_image }}
   NODE_NGINX_IMAGE_VERSION={{cops_terralego_nginx_docker_tag}}
   NGINX_PORT={{cops_terralego_nginx_port}}
   NGINX_SSL_PORT={{cops_terralego_nginx_ssl_port}}
+  NODE_BASE_NODE_IMAGE={{cops_terralego_node_base_node_image}}
+  NODE_BASE_NODE_VERSION={{cops_terralego_node_base_node_version}}
+  NODE_BASE_NGINX_IMAGE={{cops_terralego_node_base_nginx_image}}
+  NODE_BASE_NGINX_VERSION={{cops_terralego_node_base_nginx_version}}
 cops_terralego_dotenv_extra: ""
 # free form for params inside dockerenv
 cops_terralego_docker_env_extra: ""
-# free form for params inside local.py
-cops_terralego_localpy_extra: ""
 # Normally playbook is in ./.ansible/playbooks
 cops_terralego_code_dir: "{{playbook_dir}}/../.."
 cops_terralego_code_rsync_opts: [

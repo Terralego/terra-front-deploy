@@ -51,6 +51,7 @@ server {
     access_log /logs/terralego-access.log custom_combined if=$method_loggable;
 
     gzip on;
+    server_tokens off;
     # adds a Vary: Accept-Encoding in the response, and it's a valid varying
     # info as we may not gzip depending on the value of Accept-Encoding
     gzip_vary on;
@@ -89,7 +90,7 @@ server {
     set $http_x_forwarded_proto    $http_x_forwarded_proto_resolved;
     set $http_x_forwarded_ssl      $http_x_forwarded_ssl_resolved;
     set $http_x_forwarded_protocol $http_x_forwarded_protocol_resolved;
-    set $scheme                    $forwarded_ssl_scheme;
+    # set $scheme                    $forwarded_ssl_scheme;
     # proxy params headers
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
@@ -101,7 +102,7 @@ server {
     proxy_buffering off;
     proxy_http_version 1.1;
 
-    root   /code/public;
+    root   /code/public/;
     index  index.html;
 
     location / {
@@ -114,8 +115,7 @@ server {
         open_file_cache_min_uses 2;
         open_file_cache_errors off;
         add_header Pragma "cache";
-        add_header Cache-Control "public"
-        internal;
+        add_header Cache-Control "public";
         try_files $uri /index.html;
     }
 
