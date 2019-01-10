@@ -16,7 +16,8 @@ cops_terralego_build_args: "--no-cache nginx"
 cops_terralego_tld_domain: foo.net
 cops_terralego_back_url: "https://staging-terralego-{{cops_terralego_name}}.{{cops_terralego_tld_domain}}/api"
 # backup could be remove in a-while when we have redeployed it everywhere
-cops_terralego_restarted_services: "nginx"
+cops_terralego_restarted_services_default: "nginx"
+cops_terralego_restarted_services: "{{cops_terralego_restarted_services_default}}"
 cops_terralego_purge_volumes: []
 cops_terralego_sshargs: >-
   {% set k = hostvars[inventory_hostname].get(
