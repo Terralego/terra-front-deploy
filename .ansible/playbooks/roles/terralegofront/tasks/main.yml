@@ -58,7 +58,20 @@
 - shell: |
     set -ex
     cd "{{cops_terralego_dir}}"
-    {{cops_terralego_dc}} up -d --no-deps --force-recreate {{cops_terralego_restarted_services}}
+    {% for i in cops_terralego_restarted_services.split() %}
+    ret=
+    for i in $(seq 30);do
+      if ( {{cops_terralego_dc}} ps --services \
+           --filter status=running | egrep -q "^{{i}}$");then
+        {{cops_terralego_dc}} up -d --no-deps --force-recreate {{i}}
+        ret=$?
+      else
+        sleep 1
+      fi
+      if [ "x$ret" = "x0" ];then break;fi
+    done
+    if [ "x$ret" != "x0" ];then echo "{{i}}: failed restart";exit 1;fi
+    {% endfor %}
 - shell: |
     set -ex
     cd "{{cops_terralego_dir}}"
