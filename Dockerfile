@@ -5,7 +5,7 @@ ENV IMAGE_MODE=node
 WORKDIR /code
 ADD src /code/src/
 ADD package* /code/
-ADD eslintrc.js /code/
+ADD .eslintrc.js /code/
 ADD public /code/public/
 RUN bash -c 'set -ex \
     && chown node:node -R /code \
