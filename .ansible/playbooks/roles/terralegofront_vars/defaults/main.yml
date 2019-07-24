@@ -56,6 +56,7 @@ cops_terralego_dotenv: |-
   APP_TYPE=node
   NODE_NAME={{ cops_terralego_name }}
   COMPOSE_PROJECT_NAME={{cops_terralego_composename}}
+  CONTROL_COMPOSE_FILES={{cops_terralego_compose_files|join(' ')}}
   CI_COMMIT_SHA={{cops_terralego_gitref}}
   NODE_IMAGE={{ cops_terralego_docker_image }}
   NODE_IMAGE_VERSION={{cops_terralego_docker_tag}}
